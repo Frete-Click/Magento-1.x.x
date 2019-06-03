@@ -41,17 +41,28 @@
 			</freteclick_setup>
 		</resources>
 		<events>
-			<admin_system_config_changed_section_carriers>
+			<sales_order_place_before>
 				<observers>
-					<freteclick>
-						<type>singleton</type>
+					<observer>
 						<class>freteclick/observer</class>
-						<method>validate</method>
-					</freteclick>
+						<method>addFreteClickComment</method>
+					</observer>
 				</observers>
-			</admin_system_config_changed_section_carriers>
+			</sales_order_place_before>
 		</events>
 	</global>
+	<adminhtml>
+		<events>
+			<checkout_submit_all_after>
+				<observers>
+					<observer>
+						<class>freteclick/observer</class>
+						<method>addAdminFreteClickComment</method>
+					</observer>
+				</observers>
+			</checkout_submit_all_after>
+		</events>
+	</adminhtml>
 	<frontend>
 		<translate>
 			<modules>

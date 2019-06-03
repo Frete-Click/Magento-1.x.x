@@ -1,23 +1,21 @@
 <?php
 class Frete_Click_Model_Client extends Varien_Http_Client
 {
-
-    /**
-     * @var Mage_Shipping_Model_Rate_Request
-     */
-    protected $_rateRequest = null;
-
     protected function _getParsedData($obj)
     {
         $collection = array();
         
-        if ($obj->response->data->quote != null) {
+        if (!empty($obj->response) && !empty($obj->response->data) && !empty($obj->response->data->quote)) {
             foreach ($obj->response->data->quote as $quote) {
                 $collection[] = array(
-                    'method' => $quote->{'quote-id'},
+                    'quote_id'      => $quote->{'order-id'},
+                    'method'        => $quote->{'quote-id'},
                     'carrier_alias' => $quote->{'carrier-alias'},
-                    'price' => $quote->total,
-                    'deadline' => $quote->deadline,
+                    'price'         => $quote->total,
+                    'deadline'      => $quote->deadline,
+                    'warning'       => $quote->{'delivery-restricted'},
+                    'active'        => ($quote->{'carrier-active'} == 'carrier-enabled'),
+                    'logo'          => $quote->{'carrier-logo'},
                 );
             }
         }
@@ -26,25 +24,25 @@ class Frete_Click_Model_Client extends Varien_Http_Client
     }
 
     /**
-     * @throws Exception
-     * @return mixed
+     * @return array
      */
-    public function getQuotes()
+    public function getQuotes(Mage_Shipping_Model_Rate_Request $request)
     {
         $quotes = array();
-
-        try {
+        $hash = md5(http_build_query($this->paramsPost));
+        $body = $request->getSession()->getData("freteclick{$hash}");
+        if (empty($body)) {
             $body = $this->request('POST')->getBody();
+            $request->getSession()->setData("freteclick{$hash}", $body);
             Mage::log($this->getLastRequest());
-            Mage::log($body);
-            $data = Mage::helper('core')->jsonDecode($body, 0);
-            if ($quotes = $this->_getParsedData($data)) {
-                Mage::log(print_r($data, true));
-            }
-        } catch (Exception $e) {
-            Mage::log($e->getMessage());
-            return false;
+            Mage::log('Body:');
+        } else {
+            Mage::log('Session request body:');
         }
+
+        Mage::log($body);
+        $data = Mage::helper('core')->jsonDecode($body, 0);
+        $quotes = $this->_getParsedData($data);
 
         return $quotes;
     }

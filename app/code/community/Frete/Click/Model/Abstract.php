@@ -1,6 +1,14 @@
 <?php
 abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Abstract
-{    
+{
+    const DEFAULT_API_ORDER = 'order';
+    const DEFAULT_STORE_NAME = 'Magento Demo Store';
+    const DEFAULT_STORE_PHONE = '1140000000';
+    const DEFAULT_STORE_EMAIL = 'noreply@example.com';
+    const DEFAULT_STORE_STREET = 'Street 1';
+    const DEFAULT_STORE_NUMBER = '1';
+    const DEFAULT_STORE_DISTRICT = 'District';
+
     /**
      * Crossdocking max value for all itens in cart
      * 
@@ -14,6 +22,14 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
      * @var Mage_Shipping_Model_Rate_Request|null
      */
     protected $_rawRequest = null;
+
+    /**
+     * @return Mage_Checkout_Model_Session|Mage_Adminhtml_Model_Session_Quote
+     */
+    protected function _getSession()
+    {
+        return Mage::getSingleton(Mage::app()->getStore()->isAdmin() ? 'adminhtml/session_quote' : 'checkout/session');
+    }
 
     /**
      * Retrieve all visible items from request
@@ -100,7 +116,7 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
             return $category->getName();
         }
 
-        return __('Mixed');
+        return Mage::helper('freteclick')->__('Mixed');
     }
 
     protected function _getProductPackage()
@@ -139,38 +155,58 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
 
     protected function _getStorePostcode()
     {
-        $srcPostCode = Mage::getStoreConfig('shipping/origin/postcode', $this->getStore());
-        $srcPostCode = Mage::helper('freteclick')->formatZip($srcPostCode);
-        return $srcPostCode;
+        $postcode = Mage::getStoreConfig('shipping/origin/postcode', $this->getStore());
+        $postcode = Mage::helper('freteclick')->formatZip($postcode);
+        return $postcode;
     }
 
     protected function _getStoreName()
     {
         $name = Mage::getStoreConfig('general/store_information/name', $this->getStore());
+        if (empty($name)) {
+            $name = self::DEFAULT_STORE_NAME;
+        }
+
         return $name;
     }
 
     protected function _getStorePhone()
     {
         $phone = Mage::getStoreConfig('general/store_information/phone', $this->getStore());
+        if (empty($phone)) {
+            $phone = self::DEFAULT_STORE_PHONE;
+        }
+
         return $phone;
     }
 
     protected function _getStoreEmail()
     {
         $email = Mage::getStoreConfig('trans_email/ident_general/email', $this->getStore());
+        if (empty($email)) {
+            $email = self::DEFAULT_STORE_EMAIL;
+        }
+
         return $email;
     }
 
     protected function _getStoreStreet()
     {
         $street = Mage::getStoreConfig('shipping/origin/street_line1', $this->getStore());
+        if (empty($street)) {
+            $street = self::DEFAULT_STORE_STREET;
+        }
+
         return $street;
     }
 
     protected function _getStoreDistrict()
     {
         $district = Mage::getStoreConfig('shipping/origin/street_line2', $this->getStore());
+        if (empty($district)) {
+            $district = self::DEFAULT_STORE_DISTRICT;
+        }
+
         return $district;
     }
 
@@ -196,10 +232,10 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
 
     protected function _getStoreStreetNumber()
     {
-        $number = 1;
+        $number = self::DEFAULT_STORE_NUMBER;
         $street = explode(',', $this->_getStoreStreet());
         $last = array_pop($street);
-        if (is_numeric($last)) {
+        if (!empty($last) && is_numeric($last)) {
             $number = $last;
         }
 
@@ -243,6 +279,17 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
         }
 
         return $this->_crossdocking;
+    }
+
+    public function isValid($address)
+    {
+        if (empty($address->getStreet()) || empty($address->getDistrict()) || empty($address->getCity())
+            || empty($address->getRegion()) || empty($address->getCountry())) {
+            Mage::log('Invalid address');
+            return false;
+        }
+
+        return true;
     }
     
     public function getMethodTitle($item)
@@ -298,7 +345,7 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
      * 
      * @return Varien_Data_Collection
      */
-    public function getQuotes()
+    public function getQuotes(Mage_Shipping_Model_Rate_Request $request)
     {
         Mage::log('Frete_Click_Model_Abstract::getQuotes');
         $collection = new Varien_Data_Collection();
@@ -316,12 +363,16 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
                 'country-destination'           => $address->getCountry()
             ));
 
-            if ($quotes = $client->getQuotes()) {
+            $request->setSession($this->_getSession());
+            $quotes = $client->getQuotes($request);
+            if (!empty($quotes)) {
                 foreach ($quotes as $quote) {
                     $collection->addItem(new Varien_Object($quote));
                 }
             } else {
-                $collection->addItem(new Varien_Object(array('error'=>'Empty response')));
+                $collection->addItem(new Varien_Object(array(
+                    'error' => Mage::helper('freteclick')->__('Empty response')
+                )));
             }
         }
         
