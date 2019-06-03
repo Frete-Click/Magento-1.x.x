@@ -58,9 +58,10 @@ class Frete_Click_Model_Address_Postmon extends Varien_Object
             $ws = new Varien_Http_Client("https://api.postmon.com.br/v1/cep/{$postcode}");
             $body = $ws->request('GET')->getBody();
             $data = Mage::helper('core')->jsonDecode($body, 0);
+            Mage::log('Postmon request: '.$ws->getLastRequest());
+            Mage::log('Postmon response: '.print_r($data, true));
 
             if ($this->parseData($data)->hasError()) {
-                Mage::log(print_r($data, true));
                 return false;
             }
         } catch (Exception $e) {
