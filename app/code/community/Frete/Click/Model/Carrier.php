@@ -22,13 +22,37 @@ class Frete_Click_Model_Carrier extends Frete_Click_Model_Abstract
     public function proccessAdditionalValidation(Mage_Shipping_Model_Rate_Request $request)
     {
         $this->_rawRequest = $request;
-        
-        $address = Mage::getModel($this->getConfigData('address_model'));
-        if ($address->load($this->_rawRequest->getDestPostcode())) {
-            $this->setDestAddress($address);
-        } else {
+        $address = new Varien_Object();
+        $session = $this->_getSession();
+
+        if (Mage::app()->getStore()->isAdmin() || $session->hasQuote()) {
+            if ($shipping = $session->getQuote()->getShippingAddress()) {
+                $country = Mage::getSingleton('directory/country')->load($shipping->getCountry());
+                $address->setData(array(
+                    'postcode' => Mage::helper('freteclick')->formatZip($shipping->getPostcode()),
+                    'street' => trim($shipping->getStreet1()),
+                    'number' => trim($shipping->getStreet2()),
+                    'additional_info' => trim($shipping->getStreet3()),
+                    'district' => trim($shipping->getStreet4()),
+                    'city' => trim($shipping->getCity()),
+                    'region' => $shipping->getRegionCode(),
+                    'country' => $country->getName(),
+                ));
+                Mage::log('Shipping Address: '. print_r($address, true));
+            }
+        }
+
+        $requestPostcode = Mage::helper('freteclick')->formatZip($request->getDestPostcode());
+        if ($address->getPostcode() != $requestPostcode || !$this->isValid($address)) {
+            $address = Mage::getModel($this->getConfigData('address_model'))->load($requestPostcode);
+        }
+
+        if (!$this->isValid($address)) {
             return false;
         }
+
+        $this->setDestAddress($address);
+        return $this;
     }
 
     /**
@@ -48,9 +72,6 @@ class Frete_Click_Model_Carrier extends Frete_Click_Model_Abstract
                 $method->setMethodTitle($this->getMethodTitle($quote));
                 $method->setPrice($this->getFinalPriceWithHandlingFee($quote->getPrice()));
                 $method->setCost($quote->getPrice());
-                $this->_allowedMethods = array_merge($this->_allowedMethods, array(
-                    $method->getMethod() => $method->getMethodTitle()
-                ));
             } else {
                 Mage::logException(Mage::exception('Mage_Core', $quote->getError()));
                 $method = Mage::getModel('shipping/rate_result_error');
@@ -59,6 +80,10 @@ class Frete_Click_Model_Carrier extends Frete_Click_Model_Abstract
                 $method->setErrorMessage($quote->getError());
             }
 
+            if ($quote->getQuoteId()) {
+                $this->_getSession()->setFreteClickOrderId($quote->getQuoteId());
+            }
+            
             $rateResult->append($method);
         }
         
