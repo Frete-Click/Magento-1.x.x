@@ -32,9 +32,14 @@ class Frete_Click_Model_Client extends Varien_Http_Client
         $hash = md5(http_build_query($this->paramsPost));
         $body = $request->getSession()->getData("freteclick{$hash}");
         if (empty($body)) {
-            $body = $this->request('POST')->getBody();
+            $ws = curl_init();
+            curl_setopt($ws, CURLOPT_URL, $this->getUri(true));
+            curl_setopt($ws, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ws, CURLOPT_POST, true);
+            curl_setopt($ws, CURLOPT_POSTFIELDS, http_build_query($this->paramsPost));
+            $body = curl_exec($ws);
+            curl_close($ws);
             $request->getSession()->setData("freteclick{$hash}", $body);
-            Mage::log($this->getLastRequest());
             Mage::log('Body:');
         } else {
             Mage::log('Session request body:');
