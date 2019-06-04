@@ -55,12 +55,14 @@ class Frete_Click_Model_Address_Postmon extends Varien_Object
     {
         try {
             $postcode = Mage::helper('freteclick')->formatZip($postcode);
-            $ws = new Varien_Http_Client("https://api.postmon.com.br/v1/cep/{$postcode}");
-            $body = $ws->request('GET')->getBody();
+            $ws = curl_init();
+            curl_setopt($ws,CURLOPT_URL,"https://api.postmon.com.br/v1/cep/{$postcode}");
+            curl_setopt($ws, CURLOPT_RETURNTRANSFER, true);
+            $body = curl_exec($ws);
+            curl_close($ws);
+            Mage::log('Postmon response: '.$body);
             $data = Mage::helper('core')->jsonDecode($body, 0);
-            Mage::log('Postmon request: '.$ws->getLastRequest());
-            Mage::log('Postmon response: '.print_r($data, true));
-
+            
             if ($this->parseData($data)->hasError()) {
                 return false;
             }

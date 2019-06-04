@@ -13,4 +13,9 @@ class Frete_Click_Helper_Data extends Mage_Core_Helper_Abstract
         $postcode = str_pad($postcode, $length, '0', STR_PAD_LEFT);
         return $postcode;
     }
+
+    public function formatAmount($amount)
+    {
+        return number_format($amount, 2, ',', '');
+    }
 }

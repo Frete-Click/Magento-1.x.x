@@ -17,13 +17,6 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
     protected $_crossdocking = null;
     
     /**
-     * Raw rate request data
-     *
-     * @var Mage_Shipping_Model_Rate_Request|null
-     */
-    protected $_rawRequest = null;
-
-    /**
      * @return Mage_Checkout_Model_Session|Mage_Adminhtml_Model_Session_Quote
      */
     protected function _getSession()
@@ -124,9 +117,8 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
         $package = array();
         $sizeFactor = (float)$this->getConfigData('size_factor');
         $weightFactor = (float)$this->getConfigData('weight_factor');
-        $items = $this->_getRequestItems($this->_rawRequest);
 
-        foreach ($items as $item) {
+        foreach ($this->getItems() as $item) {
             if ($_product = $item->getProduct()) {
                 $_product->load($_product->getId());
                 $height = $this->_getProductAttribute($_product, $this->getConfigData('attribute_height'));
@@ -136,16 +128,12 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
                 $width *= $sizeFactor;
                 $depth *= $sizeFactor;
                 $weigth = $item->getWeight() * $weightFactor;
-                $height = number_format($height, 2, ',', '');
-                $width  = number_format($width, 2, ',', '');
-                $depth  = number_format($depth, 2, ',', '');
-                $weigth = number_format($weigth, 2, ',', '');
                 $package[] = array(
                     'qtd'       => $item->getTotalQty(),
-                    'weight'    => $weigth,
-                    'height'    => $height,
-                    'width'     => $width,
-                    'depth'     => $depth
+                    'weight'    => Mage::helper('freteclick')->formatAmount($weigth, 2, ',', ''),
+                    'height'    => Mage::helper('freteclick')->formatAmount($height, 2, ',', ''),
+                    'width'     => Mage::helper('freteclick')->formatAmount($width, 2, ',', ''),
+                    'depth'     => Mage::helper('freteclick')->formatAmount($depth, 2, ',', '')
                 );
             }
         }
@@ -250,8 +238,7 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
     protected function _getCategoryIds()
     {
         $categoryIds = array();
-        $items = $this->_getRequestItems($this->_rawRequest);
-        foreach ($items as $item) {
+        foreach ($this->getItems() as $item) {
             $categoryIds = array_merge($categoryIds, $item->getProduct()->getCategoryIds());
         }
 
@@ -265,9 +252,7 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
             $attribute = $this->getConfigData('attribute_crossdocking');
 
             if (!empty($attribute)) {
-                $items = $this->_getRequestItems($this->_rawRequest);
-
-                foreach ($items as $item) {
+                foreach ($this->getItems() as $item) {
                     $crossdocking = max(
                         $crossdocking,
                         (int) $this->_getProductAttribute($item->getProduct(), $attribute)
@@ -326,16 +311,6 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
                 'state-origin'          => $this->_getStoreRegion(),
                 'country-origin'        => $this->_getStoreCountry()
             ));
-
-            $productPack = $this->_getProductPackage();
-            if (!empty($productPack)) {
-                // Product Cart information
-                $client->setParameterPost(array(
-                    'product-type' => $this->_getMainCategory(),
-                    'product-total-price' => $this->_rawRequest->getPackageValue(),
-                    'product-package' => $productPack
-                ));
-            }
         }
 
         return $client;
@@ -349,8 +324,19 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
     {
         Mage::log('Frete_Click_Model_Abstract::getQuotes');
         $collection = new Varien_Data_Collection();
+        $this->setItems($this->_getRequestItems($request));
         
         if ($client = $this->getClientRequest()) {
+            $productPack = $this->_getProductPackage();
+            if (!empty($productPack)) {
+                // Product Cart information
+                $client->setParameterPost(array(
+                    'product-type' => $this->_getMainCategory(),
+                    'product-total-price' => Mage::helper('freteclick')->formatAmount($request->getPackageValue()),
+                    'product-package' => $productPack
+                ));
+            }
+
             $address = $this->getDestAddress();
             $client->setParameterPost(array(
                 'cep-destination'               => $address->getPostcode(),
@@ -370,9 +356,7 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
                     $collection->addItem(new Varien_Object($quote));
                 }
             } else {
-                $collection->addItem(new Varien_Object(array(
-                    'error' => Mage::helper('freteclick')->__('Empty response')
-                )));
+                Mage::log('Empty response');
             }
         }
         
