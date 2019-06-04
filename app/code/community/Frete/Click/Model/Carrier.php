@@ -21,7 +21,6 @@ class Frete_Click_Model_Carrier extends Frete_Click_Model_Abstract
      */
     public function proccessAdditionalValidation(Mage_Shipping_Model_Rate_Request $request)
     {
-        $this->_rawRequest = $request;
         $address = new Varien_Object();
         $session = $this->_getSession();
 
@@ -38,7 +37,6 @@ class Frete_Click_Model_Carrier extends Frete_Click_Model_Abstract
                     'region' => $shipping->getRegionCode(),
                     'country' => $country->getName(),
                 ));
-                Mage::log('Shipping Address: '. print_r($address, true));
             }
         }
 

@@ -12,10 +12,11 @@ class Frete_Click_Model_Observer
         $freteClickOrderId = Mage::getSingleton('checkout/session')->getFreteClickOrderId();
 
         if (!empty($freteClickOrderId) && $order->getShippingMethod(true)->getCarrierCode() == 'freteclick') {
-            Mage::log('Adding order comment...'.Mage::helper('freteclick')->__('Frete Click Order Id: %s', $freteClickOrderId));
             $order->addStatusHistoryComment(
                 Mage::helper('freteclick')->__('Frete Click Order Id: %s', $freteClickOrderId)
             );
+
+            Mage::getSingleton('checkout/session')->unsFreteClickOrderId();
         }
     }
 
@@ -30,11 +31,11 @@ class Frete_Click_Model_Observer
         $freteClickOrderId = Mage::getSingleton('adminhtml/session_quote')->getFreteClickOrderId();
 
         if (!empty($freteClickOrderId) && $order->getShippingMethod(true)->getCarrierCode() == 'freteclick') {
-            Mage::log('Adding order comment...'.Mage::helper('freteclick')->__('Frete Click Order Id: %s', $freteClickOrderId));
             $order->addStatusHistoryComment(
                 Mage::helper('freteclick')->__('Frete Click Order Id: %s', $freteClickOrderId)
             );
             $order->save();
+            Mage::getSingleton('adminhtml/session_quote')->unsFreteClickOrderId();
         }
     }
 
