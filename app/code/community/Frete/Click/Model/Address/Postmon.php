@@ -54,7 +54,6 @@ class Frete_Click_Model_Address_Postmon extends Varien_Object
     public function load($postcode)
     {
         try {
-            $postcode = Mage::helper('freteclick')->formatZip($postcode);
             $ws = curl_init();
             curl_setopt($ws,CURLOPT_URL,"https://api.postmon.com.br/v1/cep/{$postcode}");
             curl_setopt($ws, CURLOPT_RETURNTRANSFER, true);
