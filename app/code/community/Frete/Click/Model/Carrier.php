@@ -21,29 +21,8 @@ class Frete_Click_Model_Carrier extends Frete_Click_Model_Abstract
      */
     public function proccessAdditionalValidation(Mage_Shipping_Model_Rate_Request $request)
     {
-        $address = new Varien_Object();
-        $session = $this->_getSession();
-
-        if (Mage::app()->getStore()->isAdmin() || $session->hasQuote()) {
-            if ($shipping = $session->getQuote()->getShippingAddress()) {
-                $country = Mage::getSingleton('directory/country')->load($shipping->getCountry());
-                $address->setData(array(
-                    'postcode' => Mage::helper('freteclick')->formatZip($shipping->getPostcode()),
-                    'street' => trim($shipping->getStreet1()),
-                    'number' => trim($shipping->getStreet2()),
-                    'additional_info' => trim($shipping->getStreet3()),
-                    'district' => trim($shipping->getStreet4()),
-                    'city' => trim($shipping->getCity()),
-                    'region' => $shipping->getRegionCode(),
-                    'country' => $country->getName(),
-                ));
-            }
-        }
-
         $requestPostcode = Mage::helper('freteclick')->formatZip($request->getDestPostcode());
-        if ($address->getPostcode() != $requestPostcode || !$this->isValid($address)) {
-            $address = Mage::getModel($this->getConfigData('address_model'))->load($requestPostcode);
-        }
+        $address = Mage::getModel($this->getConfigData('address_model'))->load($requestPostcode);
 
         if (!$this->isValid($address)) {
             return false;
