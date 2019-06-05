@@ -21,6 +21,7 @@ class Frete_Click_Model_Carrier extends Frete_Click_Model_Abstract
      */
     public function proccessAdditionalValidation(Mage_Shipping_Model_Rate_Request $request)
     {
+        Mage::log('Frete_Click_Model_Carrier::proccessAdditionalValidation');
         $requestPostcode = Mage::helper('freteclick')->formatZip($request->getDestPostcode());
         $address = Mage::getModel($this->getConfigData('address_model'))->load($requestPostcode);
 

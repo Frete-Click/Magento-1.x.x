@@ -28,9 +28,11 @@ class Frete_Click_Model_Client extends Varien_Http_Client
      */
     public function getQuotes(Mage_Shipping_Model_Rate_Request $request)
     {
+        Mage::log('Frete_Click_Model_Client::getQuotes');
         $quotes = array();
         $hash = md5(http_build_query($this->paramsPost));
         $body = $request->getSession()->getData("freteclick{$hash}");
+        
         if (empty($body)) {
             $ws = curl_init();
             curl_setopt($ws, CURLOPT_URL, $this->getUri(true));
@@ -39,15 +41,18 @@ class Frete_Click_Model_Client extends Varien_Http_Client
             curl_setopt($ws, CURLOPT_POSTFIELDS, http_build_query($this->paramsPost));
             $body = curl_exec($ws);
             curl_close($ws);
-            $request->getSession()->setData("freteclick{$hash}", $body);
-            Mage::log('Body:');
         } else {
-            Mage::log('Session request body:');
+            Mage::log('Session request');
         }
 
-        Mage::log($body);
         $data = Mage::helper('core')->jsonDecode($body, 0);
         $quotes = $this->_getParsedData($data);
+
+        if (empty($quotes)) {
+            $request->getSession()->unsetData("freteclick{$hash}");
+        } else {
+            $request->getSession()->setData("freteclick{$hash}", $body);
+        }
 
         return $quotes;
     }
