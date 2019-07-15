@@ -62,6 +62,15 @@
 				</observers>
 			</checkout_submit_all_after>
 		</events>
+		<translate>
+			<modules>
+				<freteclick>
+					<files>
+						<default>Frete_Click.csv</default>
+					</files>
+				</freteclick>
+			</modules>
+		</translate>
 	</adminhtml>
 	<frontend>
 		<translate>
