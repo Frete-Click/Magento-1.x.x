@@ -1,3 +1,7 @@
 "Mixed","Diversos"
 "%s - %d days","%s - %d dias"
 "Frete Click Order Id: %s","Número da Cotação: %s"
+"Cheapest Shipping","Frete Econômico"
+"Fastest Shipping","Frete Expresso"
+"Display cheapest and fastest only","Exibir apenas Econômico e Expresso"
+"Summarizes the shipping quote to two results only. The cheapest and the fastest.","Resume a cotação de frete a apenas dois resultados. O frete mais econômico, e o frete mais rápido."
