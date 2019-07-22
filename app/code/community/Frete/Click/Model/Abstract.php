@@ -266,9 +266,38 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
         return $this->_crossdocking;
     }
 
+    protected function _getCollectionFilter(Varien_Data_Collection $collection)
+    {
+        if (!empty($collection) && $this->getConfigFlag('fast_and_cheap_filter')) {
+            $bestPriceItem = $collection->getFirstItem();
+            $fastDeliveryItem = $collection->getFirstItem();
+
+            foreach ($collection as $item) {
+                if ($item->getPrice() < $bestPriceItem->getPrice()) {
+                    $bestPriceItem = $item;
+                }
+
+                if ($item->getDeadline() < $fastDeliveryItem->getDeadline()) {
+                    $fastDeliveryItem = $item;
+                }
+            }
+
+            $fastDeliveryItem->setCarrierAlias(Mage::helper('freteclick')->__('Fastest Shipping'));
+            $collection = new Varien_Data_Collection();
+            $collection->addItem($fastDeliveryItem);
+
+            if ($bestPriceItem != $fastDeliveryItem) {
+                $bestPriceItem->setCarrierAlias(Mage::helper('freteclick')->__('Cheapest Shipping'));
+                $collection->addItem($bestPriceItem);
+            }
+        }
+
+        return $collection;
+    }
+
     public function isValid($address)
     {
-        if (empty($address->getStreet()) || empty($address->getDistrict()) || empty($address->getCity())
+        if (empty($address) || empty($address->getStreet()) || empty($address->getDistrict()) || empty($address->getCity())
             || empty($address->getRegion()) || empty($address->getCountry())) {
             Mage::log('Invalid address');
             return false;
@@ -360,6 +389,7 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
             }
         }
         
+        $collection = $this->_getCollectionFilter($collection);
         return $collection;
     }
 }

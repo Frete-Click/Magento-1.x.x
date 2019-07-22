@@ -102,6 +102,7 @@
 				<attribute_crossdocking>posting_days</attribute_crossdocking>
 				<size_factor>1</size_factor>
 				<weight_factor>1</weight_factor>
+				<fast_and_cheap_filter>0</fast_and_cheap_filter>
 			</freteclick>
 		</carriers>
 	</default>
