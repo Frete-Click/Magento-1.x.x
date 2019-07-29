@@ -42,6 +42,10 @@ class Frete_Click_Model_Carrier extends Frete_Click_Model_Abstract
         Mage::log('Frete_Click_Model_Carrier::collectRates');
         $rateResult = Mage::getModel('shipping/rate_result');
         foreach ($this->getQuotes($request) as $quote) {
+            if (empty($quote->getPrice())) {
+                Mage::log('Empty price for ' . $quote->getMethod());
+                continue;
+            }
             if (!$quote->hasError()) {
                 $method = Mage::getModel('shipping/rate_result_method');
                 $method->setCarrier($this->getCarrierCode());
