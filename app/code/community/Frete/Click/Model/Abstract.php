@@ -268,7 +268,7 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
 
     protected function _getCollectionFilter(Varien_Data_Collection $collection)
     {
-        if (!empty($collection) && $this->getConfigFlag('fast_and_cheap_filter')) {
+        if ($collection->count() > 0 && $this->getConfigFlag('fast_and_cheap_filter')) {
             $bestPriceItem = $collection->getFirstItem();
             $fastDeliveryItem = $collection->getFirstItem();
 
