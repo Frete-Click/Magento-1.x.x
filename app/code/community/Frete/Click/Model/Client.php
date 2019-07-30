@@ -48,7 +48,7 @@ class Frete_Click_Model_Client extends Varien_Http_Client
         $data = Mage::helper('core')->jsonDecode($body, 0);
         $quotes = $this->_getParsedData($data);
 
-        if (empty($quotes)) {
+        if (empty($quotes) || empty($body)) {
             $request->getSession()->unsetData("freteclick{$hash}");
         } else {
             $request->getSession()->setData("freteclick{$hash}", $body);
