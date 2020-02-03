@@ -72,11 +72,7 @@ class Frete_Click_Model_Carrier extends Frete_Click_Model_Abstract
      */
     public function getMethodPrice($cost, $method = '')
     {
-        $config = $this->getConfigData($this->_freeMethod);
-        $freeMethods = explode(',', $config);
-
-        return in_array($method, $freeMethods)
-            && $this->getConfigFlag('free_shipping_enable')
+        return $this->getConfigFlag('free_shipping_enable')
             && $this->getConfigData('free_shipping_subtotal') <= $this->_rawRequest->getBaseSubtotalInclTax()
             ? '0.00'
             : $this->getFinalPriceWithHandlingFee($cost);
@@ -92,64 +88,26 @@ class Frete_Click_Model_Carrier extends Frete_Click_Model_Abstract
             return;
         }
 
-        $freeMethods = $this->getConfigData($this->_freeMethod);
-        if (!$freeMethods) {
-            return;
-        }
-        $freeRates = array();
-        $freeMethods = explode(',', $freeMethods);
-
-        if (is_object($this->_result) && !empty($freeMethods)) {
-            foreach ($this->_result->getAllRates() as $id=>$item) {
-                if (in_array($item->getMethod(), $freeMethods)) {
-                    $freeRates[$item->getMethod()] = $id;
-                }
-            }
-        }
-
-        if (empty($freeRates)) {
-            return;
-        }
-        $price = array();
         if ($request->getFreeMethodWeight() > 0) {
-            $this->_setFreeMethodRequest($freeMethods);
-
+            $this->_setFreeMethodRequest(true);
             $result = $this->_getQuotes();
-            if ($result && ($rates = $result->getAllRates()) && count($rates)>0) {
-                if ((count($rates) == 1)
-                    && ($rates[0] instanceof Mage_Shipping_Model_Rate_Result_Method)
-                    && ($id = $freeRates[$rates[0]->getMethod()])
-                ) {
-                    $price[$id] = $rates[0]->getPrice();
-                }
-                if (count($rates) > 1) {
-                    foreach ($rates as $rate) {
-                        if ($rate instanceof Mage_Shipping_Model_Rate_Result_Method
-                            && in_array($rate->getMethod(), $freeMethods)
-                            && ($id = $freeRates[$rate->getMethod()])
-                        ) {
-                            $price[$id] = $rate->getPrice();
-                        }
-                    }
-                }
-            }
+            $this->_result = $result;
         } else {
             /**
              * if we can apply free shipping for all order we should force price
              * to $0.00 for shipping with out sending second request to carrier
              */
-            foreach ($freeRates as $id) {
-                $price[$id] = 0;
-            }
-        }
+            Mage::log('Save request. Setting zero for all methods.');
+            $singleResult = Mage::getModel('shipping/rate_result');
+            $rates = $this->_result->getAllRates();
 
-        /**
-         * if we did not get our free shipping method in response we must use its old price
-         */
-        if (!empty($price)) {
-            foreach ($freeRates as $id) {
-                $this->_result->getRateById($id)->setPrice($price[$id]);
+            if ($rate = array_shift($rates)) {
+                $rate->setPrice(0);
+                $rate->setMethodTitle(__('Free Shipping'));
+                $singleResult->append($rate);
             }
+
+            $this->_result = $singleResult;
         }
     }
 

@@ -126,7 +126,7 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
         foreach ($this->getItems() as $item) {
             $totalQty = is_numeric($item->getTotalQty()) ? $item->getTotalQty() : $item->getQty();
 
-            if ($this->_isFreeRequest && ($freeQty = $item->getFreeShipping())) {
+            if ($this->_isFreeRequest && ($freeQty = (int)$item->getFreeShipping())) {
                 Mage::log(__('Free Item: %s (qty: %s | freeQty: %s)', $item->getName(), $totalQty, $freeQty));
 
                 if (!is_numeric($freeQty) || $totalQty <= $freeQty) {

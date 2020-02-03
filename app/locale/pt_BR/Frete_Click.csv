@@ -9,4 +9,3 @@
 "Summarizes the shipping quote to two results only. The cheapest and the fastest.","Resume a cotação de frete a apenas dois resultados. O frete mais econômico, e o frete mais rápido."
 "Zip From","CEP inicial"
 "Zip To","CEP final"
-"Specify the methods available for free shipping. Required for Cart Rules with free shipping. Important: Alphanumeric only; separated by commas; without spaces.","Especifique os métodos de entrega para frete grátis. Obrigatório caso utilize opção de frete grátis nas Regras de Carrinho. Importante: Somente caracteres alphanuméricos; separado por vírgulas; sem espaços."
