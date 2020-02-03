@@ -7,9 +7,10 @@ class Frete_Click_Model_Client extends Varien_Http_Client
         
         if (!empty($obj->response) && !empty($obj->response->data) && !empty($obj->response->data->quote)) {
             foreach ($obj->response->data->quote as $quote) {
+                $fixMethodCode = Zend_Filter::filterStatic($quote->{'carrier-alias'}, 'Alnum');
                 $collection[] = array(
                     'quote_id'      => $quote->{'order-id'},
-                    'method'        => $quote->{'quote-id'},
+                    'method'        => $fixMethodCode,
                     'carrier_alias' => $quote->{'carrier-alias'},
                     'price'         => $quote->total,
                     'deadline'      => $quote->deadline,
