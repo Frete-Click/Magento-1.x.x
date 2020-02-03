@@ -213,6 +213,16 @@
                             <depends><active>1</active></depends>
                             <comment>Summarizes the shipping quote to two results only. The cheapest and the fastest.</comment>
                         </fast_and_cheap_filter>
+                        <allowed_zips translate="label">
+                            <label>Allowed Postal Codes Ranges</label>
+                            <frontend_model>freteclick/config_allowedZips</frontend_model>
+                            <backend_model>adminhtml/system_config_backend_serialized_array</backend_model>
+                            <sort_order>289</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
+                        </allowed_zips>
                         <debug translate="label">
                             <label>Debug</label>
                             <frontend_type>select</frontend_type>

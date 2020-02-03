@@ -295,6 +295,36 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
         return $collection;
     }
 
+    /**
+     * Postal code validation
+     * Store owner can configure multiple zip ranges for validity.
+     * @author Rafael Patro <rafaelpatro@gmail.com>
+     */
+    public function validateAllowedZips($postcode)
+    {
+        $output = true;
+        
+        if ($allowedZips = $this->getConfigData('allowed_zips')) {
+            $allowedZips = unserialize($allowedZips);
+            
+            if (is_array($allowedZips) && !empty($allowedZips)) {
+                $output = false;
+                $postcode = Mage::helper('freteclick')->formatZip($postcode);
+                
+                foreach ($allowedZips as $zip) {
+                    $isValid = ((int)$zip['from'] <= (int)$postcode);
+                    $isValid &= ((int)$zip['to'] >= (int)$postcode);
+                    if ($isValid) {
+                        $output = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $output;
+    }
+
     public function isValid($address)
     {
         if (empty($address) || empty($address->getStreet()) || empty($address->getDistrict()) || empty($address->getCity())

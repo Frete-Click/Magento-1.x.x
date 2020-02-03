@@ -29,6 +29,10 @@ class Frete_Click_Model_Carrier extends Frete_Click_Model_Abstract
             return false;
         }
 
+        if (!$this->validateAllowedZips($requestPostcode)) {
+            return false;
+        }
+
         $this->setDestAddress($address);
         return $this;
     }
