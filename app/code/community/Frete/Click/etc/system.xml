@@ -213,6 +213,16 @@
                             <depends><active>1</active></depends>
                             <comment>Summarizes the shipping quote to two results only. The cheapest and the fastest.</comment>
                         </fast_and_cheap_filter>
+                        <allowed_zips translate="label">
+                            <label>Allowed Postal Codes Ranges</label>
+                            <frontend_model>freteclick/config_allowedZips</frontend_model>
+                            <backend_model>adminhtml/system_config_backend_serialized_array</backend_model>
+                            <sort_order>289</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
+                        </allowed_zips>
                         <debug translate="label">
                             <label>Debug</label>
                             <frontend_type>select</frontend_type>
@@ -233,6 +243,29 @@
                             <show_in_store>0</show_in_store>
                             <depends><active>1</active></depends>
                         </showmethod>
+                        <free_shipping_enable translate="label">
+                            <label>Free Shipping with Minimum Order Amount</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_enabledisable</source_model>
+                            <sort_order>305</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
+                        </free_shipping_enable>
+                        <free_shipping_subtotal translate="label">
+                            <label>Minimum Order Amount for Free Shipping</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-number validate-zero-or-greater</validate>
+                            <sort_order>306</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends>
+                                <active>1</active>
+                                <free_shipping_enable>1</free_shipping_enable>
+                            </depends>
+                        </free_shipping_subtotal>
                         <specificerrmsg translate="label">
                             <label>Displayed Error Message</label>
                             <frontend_type>textarea</frontend_type>

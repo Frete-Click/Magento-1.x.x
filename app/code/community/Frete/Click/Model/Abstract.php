@@ -15,6 +15,11 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
      * @var int
      */
     protected $_crossdocking = null;
+
+    /**
+     * @var boolean
+     */
+    protected $_isFreeRequest;
     
     /**
      * @return Mage_Checkout_Model_Session|Mage_Adminhtml_Model_Session_Quote
@@ -119,6 +124,18 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
         $weightFactor = (float)$this->getConfigData('weight_factor');
 
         foreach ($this->getItems() as $item) {
+            $totalQty = is_numeric($item->getTotalQty()) ? $item->getTotalQty() : $item->getQty();
+
+            if ($this->_isFreeRequest && ($freeQty = (int)$item->getFreeShipping())) {
+                Mage::log(__('Free Item: %s (qty: %s | freeQty: %s)', $item->getName(), $totalQty, $freeQty));
+
+                if (!is_numeric($freeQty) || $totalQty <= $freeQty) {
+                    continue;
+                }
+                
+                $totalQty -= $freeQty;
+            }
+
             if ($_product = $item->getProduct()) {
                 $_product->load($_product->getId());
                 $height = $this->_getProductAttribute($_product, $this->getConfigData('attribute_height'));
@@ -129,7 +146,7 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
                 $depth *= $sizeFactor;
                 $weigth = $item->getWeight() * $weightFactor;
                 $package[] = array(
-                    'qtd'       => $item->getTotalQty(),
+                    'qtd'       => $totalQty,
                     'weight'    => Mage::helper('freteclick')->formatAmount($weigth, 2, ',', ''),
                     'height'    => Mage::helper('freteclick')->formatAmount($height, 2, ',', ''),
                     'width'     => Mage::helper('freteclick')->formatAmount($width, 2, ',', ''),
@@ -293,6 +310,36 @@ abstract class Frete_Click_Model_Abstract extends Mage_Shipping_Model_Carrier_Ab
         }
 
         return $collection;
+    }
+
+    /**
+     * Postal code validation
+     * Store owner can configure multiple zip ranges for validity.
+     * @author Rafael Patro <rafaelpatro@gmail.com>
+     */
+    public function validateAllowedZips($postcode)
+    {
+        $output = true;
+        
+        if ($allowedZips = $this->getConfigData('allowed_zips')) {
+            $allowedZips = unserialize($allowedZips);
+            
+            if (is_array($allowedZips) && !empty($allowedZips)) {
+                $output = false;
+                $postcode = Mage::helper('freteclick')->formatZip($postcode);
+                
+                foreach ($allowedZips as $zip) {
+                    $isValid = ((int)$zip['from'] <= (int)$postcode);
+                    $isValid &= ((int)$zip['to'] >= (int)$postcode);
+                    if ($isValid) {
+                        $output = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return $output;
     }
 
     public function isValid($address)

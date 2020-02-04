@@ -7,6 +7,16 @@ class Frete_Click_Model_Carrier extends Frete_Click_Model_Abstract
     protected $_allowedMethods = array();
     
     /**
+     * @var Mage_Shipping_Model_Rate_Result
+     */
+    protected $_result;
+
+    /**
+     * @var Mage_Shipping_Model_Rate_Request
+     */
+    protected $_rawRequest;
+
+    /**
      * (non-PHPdoc)
      * @see Mage_Shipping_Model_Carrier_Interface::getAllowedMethods()
      */
@@ -29,6 +39,10 @@ class Frete_Click_Model_Carrier extends Frete_Click_Model_Abstract
             return false;
         }
 
+        if (!$this->validateAllowedZips($requestPostcode)) {
+            return false;
+        }
+
         $this->setDestAddress($address);
         return $this;
     }
@@ -40,8 +54,74 @@ class Frete_Click_Model_Carrier extends Frete_Click_Model_Abstract
     public function collectRates(Mage_Shipping_Model_Rate_Request $request)
     {
         Mage::log('Frete_Click_Model_Carrier::collectRates');
+        $this->_rawRequest = $request;
+        $this->_result = $this->_getQuotes();
+        $this->_updateFreeMethodQuote($request);
+
+        return $this->_result;
+    }
+
+    protected function _setFreeMethodRequest($freeMethod)
+    {
+        $this->_isFreeRequest = true;
+    }
+
+    /**
+     * (non-PHPdoc)
+     * @see Mage_Shipping_Model_Carrier_Abstract::getMethodPrice()
+     */
+    public function getMethodPrice($cost, $method = '')
+    {
+        return $this->getConfigFlag('free_shipping_enable')
+            && $this->getConfigData('free_shipping_subtotal') <= $this->_rawRequest->getBaseSubtotalInclTax()
+            ? '0.00'
+            : $this->getFinalPriceWithHandlingFee($cost);
+    }
+
+    /**
+     * (non-PHPdoc)
+     * @see Mage_Shipping_Model_Carrier_Abstract::_updateFreeMethodQuote()
+     */
+    protected function _updateFreeMethodQuote($request)
+    {
+        if ($request->getFreeMethodWeight() == $request->getPackageWeight() || !$request->hasFreeMethodWeight()) {
+            return;
+        }
+
+        if ($request->getFreeMethodWeight() > 0) {
+            $this->_setFreeMethodRequest(true);
+            $result = $this->_getQuotes();
+            $this->_result = $result;
+        } else {
+            /**
+             * if we can apply free shipping for all order we should force price
+             * to $0.00 for shipping with out sending second request to carrier
+             */
+            Mage::log('Save request. Setting zero for all methods.');
+            $singleResult = Mage::getModel('shipping/rate_result');
+            $rates = $this->_result->getAllRates();
+
+            if ($rate = array_shift($rates)) {
+                $rate->setPrice(0);
+                $rate->setMethodTitle(__('Free Shipping'));
+                $singleResult->append($rate);
+            }
+
+            $this->_result = $singleResult;
+        }
+    }
+
+    /**
+     * (non-PHPdoc)
+     * @see Mage_Shipping_Model_Carrier_Abstract::_getQuotes()
+     */
+    protected function _getQuotes()
+    {
+        Mage::log('Frete_Click_Model_Carrier::_getQuotes');
         $rateResult = Mage::getModel('shipping/rate_result');
-        foreach ($this->getQuotes($request) as $quote) {
+        $quotes = $this->getQuotes($this->_rawRequest);
+
+        foreach ($quotes as $quote) {
             if (empty($quote->getPrice())) {
                 Mage::log('Empty price for ' . $quote->getMethod());
                 continue;
@@ -50,9 +130,9 @@ class Frete_Click_Model_Carrier extends Frete_Click_Model_Abstract
                 $method = Mage::getModel('shipping/rate_result_method');
                 $method->setCarrier($this->getCarrierCode());
                 $method->setCarrierTitle($this->getConfigData('title'));
-                $method->setMethod($this->getCarrierCode().'_'.$quote->getMethod());
+                $method->setMethod($quote->getMethod());
                 $method->setMethodTitle($this->getMethodTitle($quote));
-                $method->setPrice($this->getFinalPriceWithHandlingFee($quote->getPrice()));
+                $method->setPrice($this->getMethodPrice($quote->getPrice(), $quote->getMethod()));
                 $method->setCost($quote->getPrice());
             } else {
                 Mage::logException(Mage::exception('Mage_Core', $quote->getError()));
