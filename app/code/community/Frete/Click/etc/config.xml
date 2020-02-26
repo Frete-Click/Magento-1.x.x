@@ -89,7 +89,7 @@
 				<active>0</active>
 				<model>Frete_Click_Model_Carrier</model>
 				<title>Frete Click</title>
-				<api_quote_url>https://api.freteclick.com.br/sales/shipping-quote.json</api_quote_url>
+				<api_quote_url>https://app.freteclick.com.br/sales/shipping-quote.json</api_quote_url>
 				<address_model>freteclick/address_postmon</address_model>
 				<handling_action>P</handling_action>
 				<shipment_requesttype>0</shipment_requesttype>
