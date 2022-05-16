@@ -11,5 +11,14 @@ Módulo para realização de frete com a Frete Click na plataforma Magento 1.x.x
 - Use a tela System->Sales->Shipping Methods->Frete Click  para configurar o plug-in e inserir a chave de API.
 
 ## 3º Passo: configuração na plataforma Magento 1
+
+1º Crie os seguites attributos em Catalog->Attributes->Manage Attributes
+- Altura				= Height
+- Largura				= Width
+- Comprimento			= Length
+- Diferença de Encaixe	= Fit Difference
+- Prazo de Postagem		= Posting Deadline
+
+2º Configure o Fator de tamanho e peso.
 - Fator de Tamanho  = 100
 - Fator de Peso     = 1000
