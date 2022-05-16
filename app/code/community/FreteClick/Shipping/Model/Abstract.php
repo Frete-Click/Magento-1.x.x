@@ -403,7 +403,7 @@ abstract class FreteClick_Shipping_Model_Abstract extends Mage_Shipping_Model_Ca
         if ($client = $this->getClientRequest()) {
             $productPack = $this->_getProductPackage();
 
-            $address = $this->getDestAddress();
+            $address = $this->getDestAddress();            
 
             $client->setParameterPost(array(
                 'destination' => array(
@@ -421,9 +421,11 @@ abstract class FreteClick_Shipping_Model_Abstract extends Mage_Shipping_Model_Ca
             if (!empty($productPack)) {
                 // Product Cart information
                 $client->setParameterPost(array(
+                    'app'   => 'Magento 1.x',
                     'productType' => $this->_getMainCategory(),
                     'productTotalPrice' => $request->getPackageValue(), //Mage::helper('freteclick')->formatAmount($request->getPackageValue()),
-                    'packages' => $productPack,
+                    'packages' => $productPack,                    
+                    'order'     =>  'total',
                     'quoteType' => ($this->getConfigData('fast_and_cheap_filter') != 1) ? 'simple' : 'full',
                     'noRetrieve' => false
                 ));
@@ -434,7 +436,7 @@ abstract class FreteClick_Shipping_Model_Abstract extends Mage_Shipping_Model_Ca
             $request->setSession($this->_getSession());
                      
             $quotes = $client->getQuotes($request);
-            
+
             if (!empty($quotes)) {
                 foreach ($quotes as $quote) {
                     $collection->addItem(new Varien_Object($quote));
