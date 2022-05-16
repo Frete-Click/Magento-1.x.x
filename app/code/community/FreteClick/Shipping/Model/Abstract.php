@@ -223,9 +223,8 @@ abstract class FreteClick_Shipping_Model_Abstract extends Mage_Shipping_Model_Ca
 
     protected function _getStoreRegion()
     {
-        $regionId = Mage::getStoreConfig('shipping/origin/region_id', $this->getStore());
-        $region = Mage::getModel('directory/region')->load($regionId)->getName();
-        return $region;
+        $state = Mage::getStoreConfig('shipping/origin/region_id');
+        return $state;
     }
 
     protected function _getStoreCountry()
@@ -368,17 +367,10 @@ abstract class FreteClick_Shipping_Model_Abstract extends Mage_Shipping_Model_Ca
     {
         if ($client = Mage::getModel('freteclick/client', $this->getConfigData('api_quote_url'))) {
             // Store account information
-
-            //$client->setHeaders("Content-type: application/json");
-            //$client->setRawData()->setEncType('application/json');
-
-    
-
             //'name'      => $this->_getStoreName(),
             //'phone'     => $this->_getStorePhone(),
             //'email'     => $this->_getStoreEmail()
  
-
             // Store address information
             $client->setParameterPost(array(
                 'origin' => array(
@@ -388,7 +380,7 @@ abstract class FreteClick_Shipping_Model_Abstract extends Mage_Shipping_Model_Ca
                     //'complement-origin'     => $this->_getStoreAdditionalInfo(),
                     //'district-origin'       => $this->_getStoreDistrict(),
                     'city'           => $this->_getStoreCity(),
-                    'state'          => "SP", //$this->_getStoreRegion(),
+                    'state'          => $this->_getStoreRegion(),
                     'country'        => $this->_getStoreCountry()
                 )
             ));
