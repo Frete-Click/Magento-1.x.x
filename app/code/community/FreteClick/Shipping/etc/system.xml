@@ -10,7 +10,7 @@
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
-                    <comment>Desenvolvido conforme manual técnico disponibilizado pela Frete Click</comment>
+                    <comment>Plugin para cotação de fretes utilizando a API da Frete Click.</comment>
                     <fields>
                         <active translate="label">
                             <label>Habilitar</label>

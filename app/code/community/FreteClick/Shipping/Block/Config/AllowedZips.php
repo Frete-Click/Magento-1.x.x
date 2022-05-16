@@ -1,5 +1,5 @@
 <?php
-class Frete_Click_Block_Config_AllowedZips extends Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract
+class FreteClick_Shipping_Block_Config_AllowedZips extends Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract
 {
 
     public function _prepareToRender()

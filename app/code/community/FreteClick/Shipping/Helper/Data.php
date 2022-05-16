@@ -1,5 +1,5 @@
 <?php
-class Frete_Click_Helper_Data extends Mage_Core_Helper_Abstract
+class FreteClick_Shipping_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public function formatTaxvat($taxvat)
     {

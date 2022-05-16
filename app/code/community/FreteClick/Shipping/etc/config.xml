@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
 	<modules>
-		<Frete_Click>
-			<version>0.0.1</version>
-		</Frete_Click>
+		<FreteClick_Shipping>
+			<version>1.0.1</version>
+		</FreteClick_Shipping>
 	</modules>
 	<global>
 		<models>
 			<freteclick>
-				<class>Frete_Click_Model</class>
+				<class>FreteClick_Shipping_Model</class>
 			</freteclick>
 		</models>
 		<blocks>
 			<freteclick>
-				<class>Frete_Click_Block</class>
+				<class>FreteClick_Shipping_Block</class>
 			</freteclick>
 		</blocks>
 		<helpers>
 			<freteclick>
-				<class>Frete_Click_Helper</class>
+				<class>FreteClick_Shipping_Helper</class>
 			</freteclick>
 		</helpers>
 		<sales>
 			<shipping>
 				<carriers>
 					<freteclick>
-						<class>Frete_Click_Model_Carrier</class>
+						<class>FreteClick_Shipping_Model_Carrier</class>
 					</freteclick>
 				</carriers>
 			</shipping>
@@ -33,7 +33,7 @@
 		<resources>
 			<freteclick_setup>
 				<setup>
-					<module>Frete_Click</module>
+					<module>FreteClick_Shipping</module>
 				</setup>
 				<connection>
 					<use>directory_setup</use>
@@ -66,7 +66,7 @@
 			<modules>
 				<freteclick>
 					<files>
-						<default>Frete_Click.csv</default>
+						<default>FreteClick_Shipping.csv</default>
 					</files>
 				</freteclick>
 			</modules>
@@ -77,7 +77,7 @@
 			<modules>
 				<freteclick>
 					<files>
-						<default>Frete_Click.csv</default>
+						<default>FreteClick_Shipping.csv</default>
 					</files>
 				</freteclick>
 			</modules>
@@ -87,9 +87,9 @@
 		<carriers>
 			<freteclick>
 				<active>0</active>
-				<model>Frete_Click_Model_Carrier</model>
+				<model>FreteClick_Shipping_Model_Carrier</model>
 				<title>Frete Click</title>
-				<api_quote_url>https://app.freteclick.com.br/sales/shipping-quote.json</api_quote_url>
+				<api_quote_url>https://api.freteclick.com.br/quotes</api_quote_url>
 				<address_model>freteclick/address_postmon</address_model>
 				<handling_action>P</handling_action>
 				<shipment_requesttype>0</shipment_requesttype>

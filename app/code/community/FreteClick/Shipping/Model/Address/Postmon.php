@@ -1,5 +1,5 @@
 <?php
-class Frete_Click_Model_Address_Postmon extends Varien_Object
+class FreteClick_Shipping_Model_Address_Postmon extends Varien_Object
 {
 
     const DEFAULT_COUNTRY = 'Brasil';

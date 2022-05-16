@@ -1,5 +1,5 @@
 <?php
-class Frete_Click_Model_Source_Attribute extends Mage_Eav_Model_Entity_Attribute_Source_Abstract
+class FreteClick_Shipping_Model_Source_Attribute extends Mage_Eav_Model_Entity_Attribute_Source_Abstract
 {
     public function toOptionArray()
     {

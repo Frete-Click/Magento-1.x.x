@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config>
     <modules>
-        <Frete_Click>
+        <FreteClick_Shipping>
             <active>true</active>
             <codePool>community</codePool>
             <depends>
                 <Mage_Shipping />
             </depends>
-        </Frete_Click>
+        </FreteClick_Shipping>
     </modules>
 </config>
