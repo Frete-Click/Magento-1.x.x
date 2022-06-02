@@ -2,7 +2,7 @@
 <config>
 	<modules>
 		<FreteClick_Shipping>
-			<version>1.0.1</version>
+			<version>1.0.2</version>
 		</FreteClick_Shipping>
 	</modules>
 	<global>
