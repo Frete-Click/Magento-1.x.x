@@ -359,6 +359,51 @@ abstract class FreteClick_Shipping_Model_Abstract extends Mage_Shipping_Model_Ca
         $finalTime = $companyTime + $this->_getCrossdocking() + (int)$this->getConfigData('crossdocking');
         return Mage::helper('freteclick')->__('%s - %d days', $name, $finalTime);
     }
+    /**
+     * return  state acronym
+     */
+    public function formatState($state)
+    {
+        //$data = '';
+
+        if(mb_strlen($state) >= 3){
+            switch ($state){
+                case 'Acre':                $data = 'AC'; break;
+                case 'Alagoas':             $data = 'AL'; break;
+                case 'Amapá':               $data = 'AP'; break;
+                case 'Amazonas':            $data = 'AM'; break;
+                case 'Bahia':               $data = 'BA'; break;
+                case 'Ceará':               $data = 'CE'; break;
+                case 'Distrito Federal':    $data = 'DF'; break;
+                case 'Espírito Santo':      $data = 'ES'; break;
+                case 'Goiás':               $data = 'GO'; break;
+                case 'Maranhão':            $data = 'MA'; break; 
+                case 'Mato Grosso':         $data = 'MT'; break;
+                case 'Mato Grosso do Sul':  $data = 'MS'; break;
+                case 'Minas Gerais':        $data = 'MG'; break;
+                case 'Pará':                $data = 'PA'; break;
+                case 'Paraíba':             $data = 'PB'; break;
+                case 'Paraná':              $data = 'PR'; break;
+                case 'Pernambuco':          $data = 'PE'; break;
+                case 'Piauí':               $data = 'PI'; break;
+                case 'Rio de Janeiro':      $data = 'RJ'; break;
+                case 'Rio Grande do Norte': $data = 'RN'; break;
+                case 'Rio Grande do Sul':   $data = 'RS'; break;
+                case 'Rondônia':            $data = 'RO'; break;
+                case 'Roraima':             $data = 'RR'; break;
+                case 'Santa Catarina':      $data = 'SC'; break;
+                case 'São Paulo':           $data = 'SP'; break;
+                case 'Sergipe':             $data = 'SE'; break;
+                case 'Tocantins':           $data = 'TO'; break;
+    
+            }
+        }else{
+            $data = $state;
+        }
+                
+        return $data;
+
+    }    
 
     /**
      * @return Varien_Http_Client
@@ -380,7 +425,7 @@ abstract class FreteClick_Shipping_Model_Abstract extends Mage_Shipping_Model_Ca
                     //'complement-origin'     => $this->_getStoreAdditionalInfo(),
                     //'district-origin'       => $this->_getStoreDistrict(),
                     'city'           => $this->_getStoreCity(),
-                    'state'          => $this->_getStoreRegion(),
+                    'state'          => $this->formatState( $this->_getStoreRegion() ),
                     'country'        => $this->_getStoreCountry()
                 )
             ));
@@ -413,7 +458,7 @@ abstract class FreteClick_Shipping_Model_Abstract extends Mage_Shipping_Model_Ca
                     //'complement-destination'        => $address->getAdditionalInfo(),
                     //'district-destination'          => $address->getDistrict(),
                     'city'              => $address->getCity(),
-                    'state'             => $address->getRegion(),
+                    'state'             => $this->formatState( $address->getRegion() ),
                     'country'           => $address->getCountry()
                 )
             ));
