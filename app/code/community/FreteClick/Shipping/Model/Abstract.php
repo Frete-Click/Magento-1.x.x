@@ -223,8 +223,15 @@ abstract class FreteClick_Shipping_Model_Abstract extends Mage_Shipping_Model_Ca
 
     protected function _getStoreRegion()
     {
-        $state = Mage::getStoreConfig('shipping/origin/region_id');
-        return $state;
+        $stateId = Mage::getStoreConfig('shipping/origin/region_id', $this->getStore());
+
+        if(is_numeric($stateId)){
+            $stateCode = Mage::getModel('directory/region')->load($stateId)->getCode();
+        }else{
+            $stateCode = $this->formatState($stateId);
+        }
+    
+        return $stateCode;
     }
 
     protected function _getStoreCountry()
@@ -411,21 +418,11 @@ abstract class FreteClick_Shipping_Model_Abstract extends Mage_Shipping_Model_Ca
     public function getClientRequest()
     {
         if ($client = Mage::getModel('freteclick/client', $this->getConfigData('api_quote_url'))) {
-            // Store account information
-            //'name'      => $this->_getStoreName(),
-            //'phone'     => $this->_getStorePhone(),
-            //'email'     => $this->_getStoreEmail()
- 
-            // Store address information
+
             $client->setParameterPost(array(
                 'origin' => array(
-                    //'cep-origin'            => $this->_getStorePostcode(),
-                    //'street-origin'         => $this->_getStoreStreet(),
-                    //'address-number-origin' => $this->_getStoreStreetNumber(),
-                    //'complement-origin'     => $this->_getStoreAdditionalInfo(),
-                    //'district-origin'       => $this->_getStoreDistrict(),
                     'city'           => $this->_getStoreCity(),
-                    'state'          => $this->formatState( $this->_getStoreRegion() ),
+                    'state'          => $this->_getStoreRegion(),
                     'country'        => $this->_getStoreCountry()
                 )
             ));
@@ -452,11 +449,6 @@ abstract class FreteClick_Shipping_Model_Abstract extends Mage_Shipping_Model_Ca
 
             $client->setParameterPost(array(
                 'destination' => array(
-                    //'cep-destination'               => $address->getPostcode(),
-                    //'street-destination'            => $address->getStreet(),
-                    //'address-number-destination'    => $address->getNumber(),
-                    //'complement-destination'        => $address->getAdditionalInfo(),
-                    //'district-destination'          => $address->getDistrict(),
                     'city'              => $address->getCity(),
                     'state'             => $this->formatState( $address->getRegion() ),
                     'country'           => $address->getCountry()
